@@ -26,9 +26,38 @@
     }
     .results {
       margin-top: 30px;
-      background: #fff;
-      padding: 20px;
+      background: #ffffff;
+      padding: 25px 30px;
       border: 1px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .results h4 {
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      color: #333;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+    }
+    .results .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      color: #222;
+    }
+    .results .summary-row span.label {
+      font-weight: 600;
+    }
+    .results .summary-row span.value {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    .results .footnote {
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 12px;
+      line-height: 1.4;
     }
     button {
       padding: 10px 20px;
@@ -50,123 +79,22 @@
 
   <h2>Nippon Express Pricing Calculator</h2>
 
-  <div class="form-block">
-    <label for="userLicenses">User Licenses</label>
-    <input type="number" id="userLicenses" value="15" min="6" max="55">
-  </div>
-
-  <div class="form-block">
-    <label for="volume">Volume (Containers)</label>
-    <input type="number" id="volume" value="10000" min="6000" max="120000">
-  </div>
-
-  <div class="form-block">
-    <label for="documentVolume">Document Volume</label>
-    <input type="number" id="documentVolume" value="10000" min="6000" max="120000">
-  </div>
-
-  <div class="form-block">
-    <label>Select Modules</label>
-    <div id="moduleCheckboxes">
-      <label><input type="checkbox" value="GoProcure"> GoProcure</label><br>
-      <label><input type="checkbox" value="GoTrack"> GoTrack</label><br>
-      <label><input type="checkbox" value="GoInvoice"> GoInvoice</label><br>
-      <label><input type="checkbox" value="GoShipment"> GoShipment</label><br>
-      <label><input type="checkbox" value="Order Management"> Order Management</label><br>
-      <label><input type="checkbox" value="Document Validation"> Document Validation</label><br>
-      <label><input type="checkbox" value="Document Reading"> Document Reading</label><br>
-    </div>
-  </div>
-
-  <button id="calculateBtn">Calculate</button>
-
   <div class="results">
-    <h4>Pricing Summary:</h4>
-    <p>Module Cost: <span id="moduleCost"></span></p>
-    <p>Total License Cost (first 5 free): <span id="totalLicenseCost"></span></p>
-    <p>Per License Price: <span id="perLicensePrice"></span> × <span id="licenseQty"></span> billable licenses</p>
-    <p>Implementation Cost (One-time): <span id="implementationCost"></span></p>
-    <p>Integration Cost (One-time): <span id="integrationCost"></span></p>
-    <p>First Year Total: <span id="firstYearTotal"></span></p>
-    <p>First Year Cost per License: <span id="perLicenseCost"></span></p>
-    <p>Second Year Total (Recurring): <span id="secondYearTotal"></span></p>
-    <p style="font-size: 12px; color: #555;">*Support & maintenance (5%) included in module cost. Licenses above 5 are chargeable.</p>
+    <h4>Pricing Summary</h4>
+    <div class="summary-row"><span class="label">Total License Cost (ARR + 5% S&M):</span> <span id="moduleCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">No. of Billable Licenses:</span> <span id="licenseQty" class="value"></span></div>
+    <div class="summary-row"><span class="label">Total License Activation Cost:</span> <span id="totalLicenseCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">Implementation Cost (15% on ARR):</span> <span id="implementationCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">Integration Cost (Slab based):</span> <span id="integrationCost" class="value"></span></div>
+    <hr style="margin: 20px 0;">
+    <div class="summary-row"><span class="label">First Year Total:</span> <span id="firstYearTotal" class="value"></span></div>
+    <div class="summary-row"><span class="label">Second Year Total (10% uplift on ARR):</span> <span id="secondYearTotal" class="value"></span></div>
+    <p class="footnote">
+      * Support & maintenance (5%) is included in the ARR.<br>
+      * Implementation and Integration costs are one-time.<br>
+      * Licenses above 5 are chargeable as per the pricing slab.<br>
+      * Second year includes a 10% increase on ARR (core + support).
+    </p>
   </div>
-
-<script>
-  const slabs = [
-    { min: 6000, max: 24000 },
-    { min: 24001, max: 42000 },
-    { min: 42001, max: 60000 },
-    { min: 60001, max: 84000 },
-    { min: 84001, max: 120000 }
-  ];
-
-  const productPricing = {
-    GoProcure: [7, 6.75, 6.45, 6.15, 5.8],
-    GoTrack: [3.75, 3.15, 2.8, 1.95, 0.72],
-    GoInvoice: [4.5, 4.3, 2.5, 2.25, 2],
-    GoShipment: [3, 2.8, 2.65, 2.3, 1.8],
-    'Order Management': [5, 4.8, 4.65, 4.3, 3.8],
-    'Document Validation': [4.5, 4.3, 4.05, 3.7, 3.2],
-    'Document Reading': [2, 1.8, 1.75, 1.6, 1.4]
-  };
-
-  const licenseTiers = [
-    { min: 6, max: 15, price: 100 },
-    { min: 16, max: 25, price: 90 },
-    { min: 26, max: 35, price: 80 },
-    { min: 36, max: 45, price: 70 },
-    { min: 46, max: 55, price: 60 }
-  ];
-
-  const discountRates = { 2: 8, 3: 15, 4: 20, 5: 25, 6: 30 };
-  const integrationCosts = [1500, 1500, 4000, 6000, 10000];
-
-  document.getElementById('calculateBtn').addEventListener('click', () => {
-    const licenses = Math.max(6, Math.min(55, parseInt(document.getElementById('userLicenses').value)));
-    const volume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('volume').value)));
-    const docVolume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('documentVolume').value)));
-    const selectedModules = [...document.querySelectorAll('#moduleCheckboxes input:checked')].map(cb => cb.value);
-
-    const getSlabIndex = (val) => slabs.findIndex(slab => val >= slab.min && val <= slab.max);
-    const slabIndex = getSlabIndex(volume);
-    const docSlabIndex = getSlabIndex(docVolume);
-
-    let coreModuleCost = 0;
-    selectedModules.forEach(mod => {
-      const idx = mod.includes("Document") ? docSlabIndex : slabIndex;
-      const units = mod.includes("Document") ? docVolume : volume;
-      coreModuleCost += productPricing[mod][idx] * units;
-    });
-
-    const discount = discountRates[selectedModules.length] || (selectedModules.length >= 6 ? 30 : 0);
-    const discountedModuleCost = coreModuleCost * (1 - discount / 100);
-    const supportMaintenance = coreModuleCost * 0.05;
-    const finalModuleCost = discountedModuleCost + supportMaintenance;
-
-    const implementationCost = coreModuleCost * 0.15;
-    const integrationCost = integrationCosts[slabIndex];
-
-    const billableLicenses = Math.max(0, licenses - 5);
-    const licensePrice = licenseTiers.find(tier => billableLicenses >= tier.min && billableLicenses <= tier.max)?.price || 60;
-    const totalLicenseCost = licensePrice * billableLicenses;
-
-    const firstYear = finalModuleCost + totalLicenseCost + implementationCost + integrationCost;
-    const secondYear = finalModuleCost + totalLicenseCost;
-    const perLicenseCost = firstYear / licenses;
-
-    const format = x => "$" + Math.round(x).toLocaleString();
-    document.getElementById('moduleCost').textContent = format(finalModuleCost);
-    document.getElementById('totalLicenseCost').textContent = format(totalLicenseCost);
-    document.getElementById('implementationCost').textContent = format(implementationCost);
-    document.getElementById('integrationCost').textContent = format(integrationCost);
-    document.getElementById('firstYearTotal').textContent = format(firstYear);
-    document.getElementById('secondYearTotal').textContent = format(secondYear);
-    document.getElementById('perLicenseCost').textContent = format(perLicenseCost);
-    document.getElementById('perLicensePrice').textContent = format(licensePrice);
-    document.getElementById('licenseQty').textContent = billableLicenses;
-  });
-</script>
 </body>
 </html>
