@@ -1,48 +1,79 @@
-<!-- Final revision per user instruction: display per-license cost as 'First Year Cost per License' and explain S&M footnote -->
-<div class="results">
-  <h4>Results:</h4>
-  <p>Module Cost: <span id="moduleCost"></span></p>
-  <p>Total License Cost: <span id="totalLicenseCost"></span></p>
-  <p>First Year Total: <span id="firstYearTotal"></span></p>
-  <p>First Year Cost per License: <span id="perLicenseCost"></span></p>
-  <p>Second Year Total: <span id="secondYearTotal"></span></p>
-  <p style="font-size: 12px; color: #555;">* First year cost includes 10% support and maintenance added to license cost</p>
-</div>
+<!-- Update to ensure content is visible and styled properly -->
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fdf6f0;
+    padding: 40px;
+    margin: auto;
+    max-width: 800px;
+  }
+  .form-block, .results {
+    margin-bottom: 20px;
+  }
+  .form-block label, .results h4 {
+    font-weight: bold;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    margin-top: 5px;
+  }
+  button {
+    padding: 10px 20px;
+    background: #e65100;
+    color: white;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #bf360c;
+  }
+  .results span {
+    font-weight: normal;
+    color: #444;
+    margin-left: 10px;
+  }
+</style>
 
+<!-- Make sure JavaScript runs after DOM loads -->
 <script>
-  // updated script logic
-  document.getElementById('calculateBtn').addEventListener('click', () => {
-    const licenses = Math.max(6, Math.min(55, parseInt(document.getElementById('userLicenses').value)));
-    const volume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('volume').value)));
-    const docVolume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('documentVolume').value)));
-    const selectedModules = [...document.querySelectorAll('#moduleCheckboxes input:checked')].map(cb => cb.value);
+  window.onload = () => {
+    document.getElementById('calculateBtn').addEventListener('click', () => {
+      const get = (id) => Math.max(6, Math.min(120000, parseInt(document.getElementById(id).value)));
+      const licenses = Math.max(6, Math.min(55, parseInt(document.getElementById('userLicenses').value)));
+      const volume = get('volume');
+      const docVolume = get('documentVolume');
+      const selectedModules = [...document.querySelectorAll('#moduleCheckboxes input:checked')].map(cb => cb.value);
 
-    const getSlabIndex = (val) => slabs.findIndex(slab => val >= slab.min && val <= slab.max);
-    const slabIndex = getSlabIndex(volume);
-    const docSlabIndex = getSlabIndex(docVolume);
+      const getSlabIndex = (val) => slabs.findIndex(slab => val >= slab.min && val <= slab.max);
+      const slabIndex = getSlabIndex(volume);
+      const docSlabIndex = getSlabIndex(docVolume);
 
-    let moduleCost = 0;
-    selectedModules.forEach(mod => {
-      const idx = mod.includes("Document") ? docSlabIndex : slabIndex;
-      const units = mod.includes("Document") ? docVolume : volume;
-      moduleCost += productPricing[mod][idx] * units;
+      let moduleCost = 0;
+      selectedModules.forEach(mod => {
+        const idx = mod.includes("Document") ? docSlabIndex : slabIndex;
+        const units = mod.includes("Document") ? docVolume : volume;
+        moduleCost += productPricing[mod][idx] * units;
+      });
+
+      const discount = discountRates[selectedModules.length] || (selectedModules.length >= 6 ? 30 : 0);
+      const discountedModuleCost = moduleCost * (1 - discount / 100);
+
+      const licensePrice = licenseTiers.find(tier => licenses >= tier.min && licenses <= tier.max)?.price || 60;
+      const totalLicenseCost = licensePrice * licenses * 1.1;
+
+      const firstYear = discountedModuleCost + totalLicenseCost;
+      const secondYear = discountedModuleCost + (totalLicenseCost * 1.1);
+      const perLicense = firstYear / licenses;
+
+      const format = x => "$" + Math.round(x).toLocaleString();
+      document.getElementById('moduleCost').textContent = format(discountedModuleCost);
+      document.getElementById('totalLicenseCost').textContent = format(totalLicenseCost);
+      document.getElementById('firstYearTotal').textContent = format(firstYear);
+      document.getElementById('perLicenseCost').textContent = format(perLicense);
+      document.getElementById('secondYearTotal').textContent = format(secondYear);
     });
-
-    const discount = discountRates[selectedModules.length] || (selectedModules.length >= 6 ? 30 : 0);
-    const discountedModuleCost = moduleCost * (1 - discount / 100);
-
-    const licensePrice = licenseTiers.find(tier => licenses >= tier.min && licenses <= tier.max)?.price || 60;
-    const totalLicenseCost = licensePrice * licenses * 1.1;
-
-    const firstYear = discountedModuleCost + totalLicenseCost;
-    const secondYear = discountedModuleCost + (totalLicenseCost * 1.1);
-    const perLicense = firstYear / licenses;
-
-    const format = x => "$" + Math.round(x).toLocaleString();
-    document.getElementById('moduleCost').textContent = format(discountedModuleCost);
-    document.getElementById('totalLicenseCost').textContent = format(totalLicenseCost);
-    document.getElementById('firstYearTotal').textContent = format(firstYear);
-    document.getElementById('perLicenseCost').textContent = format(perLicense);
-    document.getElementById('secondYearTotal').textContent = format(secondYear);
-  });
+  };
 </script>
