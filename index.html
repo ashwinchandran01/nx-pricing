@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       background: #fdf6f0;
       padding: 40px;
-      max-width: 900px;
+      max-width: 960px;
       margin: auto;
     }
     label {
@@ -72,12 +72,44 @@
       display: block;
       margin: 0 auto 30px auto;
     }
+    .form-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-  <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/d5/Nippon_Express_logo.svg/320px-Nippon_Express_logo.svg.png" alt="Nippon Express Logo">
-
+  <img class="logo" src="https://companieslogo.com/img/orig/9147.T_BIG-23205936.png?t=1648301752&download=true" alt="Nippon Express Logo">
   <h2>Nippon Express Pricing Calculator</h2>
+
+  <div class="form-section">
+    <div class="form-block">
+      <label for="volume">Container Volume</label>
+      <input type="number" id="volume" min="6000" max="120000" value="10000">
+    </div>
+    <div class="form-block">
+      <label for="documents">Document Volume</label>
+      <input type="number" id="documents" min="6000" max="120000" value="10000">
+    </div>
+    <div class="form-block">
+      <label for="licenses">Number of Licenses</label>
+      <input type="number" id="licenses" min="5" max="55" value="10">
+    </div>
+    <div class="form-block">
+      <label>Modules</label><br>
+      <label><input type="checkbox" class="module" value="GoProcure"> GoProcure</label><br>
+      <label><input type="checkbox" class="module" value="GoTrack"> GoTrack</label><br>
+      <label><input type="checkbox" class="module" value="GoInvoice"> GoInvoice</label><br>
+      <label><input type="checkbox" class="module" value="GoShipment"> GoShipment</label><br>
+      <label><input type="checkbox" class="module" value="Order Management"> Order Management</label><br>
+      <label><input type="checkbox" class="module" value="Document Validation"> Document Validation</label><br>
+      <label><input type="checkbox" class="module" value="Document Reading"> Document Reading</label>
+    </div>
+    <button onclick="calculateAndDisplay()">Calculate</button>
+  </div>
 
   <div class="results">
     <h4>Pricing Summary</h4>
@@ -96,5 +128,7 @@
       * Second year includes a 10% increase on ARR (core + support).
     </p>
   </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
