@@ -1,100 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nippon Express Pricing Calculator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      max-width: 800px;
-      margin: auto;
-      background: #fdf6f0;
-    }
-    .form-block { margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 6px; }
-    input[type="number"] { width: 100%; padding: 8px; }
-    .results { background: #fff3e0; padding: 20px; border: 1px solid #f5c79b; margin-top: 30px; }
-    button { padding: 10px 20px; background: #e65100; color: white; border: none; cursor: pointer; }
-    button:hover { background: #bf360c; }
-  </style>
-</head>
-<body>
-  <h2>Nippon Express Pricing Calculator</h2>
-
-  <div class="form-block">
-    <label>User Licenses</label>
-    <input type="number" id="userLicenses" value="15" min="6" max="55">
-  </div>
-
-  <div class="form-block">
-    <label>Volume (Containers)</label>
-    <input type="number" id="volume" value="10000" min="6000" max="120000">
-  </div>
-
-  <div class="form-block">
-    <label>Document Volume</label>
-    <input type="number" id="documentVolume" value="10000" min="6000" max="120000">
-  </div>
-
-  <div class="form-block">
-    <label>Select Modules</label>
-    <div id="moduleCheckboxes">
-      <label><input type="checkbox" value="GoProcure"> GoProcure</label><br>
-      <label><input type="checkbox" value="GoTrack"> GoTrack</label><br>
-      <label><input type="checkbox" value="GoInvoice"> GoInvoice</label><br>
-      <label><input type="checkbox" value="GoShipment"> GoShipment</label><br>
-      <label><input type="checkbox" value="Order Management"> Order Management</label><br>
-      <label><input type="checkbox" value="Document Validation"> Document Validation</label><br>
-      <label><input type="checkbox" value="Document Reading"> Document Reading</label><br>
-    </div>
-  </div>
-
-  <button id="calculateBtn">Calculate</button>
-
-  <div class="results">
-    <h4>Results:</h4>
-    <p>Module Cost: <span id="moduleCost"></span></p>
-    <p>Per License Cost: <span id="perLicenseCost"></span></p>
-    <p>Total License Cost: <span id="totalLicenseCost"></span></p>
-    <p>First Year Total: <span id="firstYearTotal"></span></p>
-    <p>Second Year Total: <span id="secondYearTotal"></span></p>
-  </div>
+<!-- Final revision per user instruction: display per-license cost as 'First Year Cost per License' and explain S&M footnote -->
+<div class="results">
+  <h4>Results:</h4>
+  <p>Module Cost: <span id="moduleCost"></span></p>
+  <p>Total License Cost: <span id="totalLicenseCost"></span></p>
+  <p>First Year Total: <span id="firstYearTotal"></span></p>
+  <p>First Year Cost per License: <span id="perLicenseCost"></span></p>
+  <p>Second Year Total: <span id="secondYearTotal"></span></p>
+  <p style="font-size: 12px; color: #555;">* First year cost includes 10% support and maintenance added to license cost</p>
+</div>
 
 <script>
-  const slabs = [
-    { min: 6000, max: 24000 },
-    { min: 24001, max: 42000 },
-    { min: 42001, max: 60000 },
-    { min: 60001, max: 84000 },
-    { min: 84001, max: 120000 }
-  ];
-
-  const productPricing = {
-    GoProcure: [7, 6.75, 6.45, 6.15, 5.8],
-    GoTrack: [3.75, 3.15, 2.8, 1.95, 0.72],
-    GoInvoice: [4.5, 4.3, 2.5, 2.25, 2],
-    GoShipment: [3, 2.8, 2.65, 2.3, 1.8],
-    'Order Management': [5, 4.8, 4.65, 4.3, 3.8],
-    'Document Validation': [4.5, 4.3, 4.05, 3.7, 3.2],
-    'Document Reading': [2, 1.8, 1.75, 1.6, 1.4]
-  };
-
-  const licenseTiers = [
-    { min: 6, max: 15, price: 100 },
-    { min: 16, max: 25, price: 90 },
-    { min: 26, max: 35, price: 80 },
-    { min: 36, max: 45, price: 70 },
-    { min: 46, max: 55, price: 60 }
-  ];
-
-  const discountRates = { 2: 8, 3: 15, 4: 20, 5: 25, 6: 30 };
-
+  // updated script logic
   document.getElementById('calculateBtn').addEventListener('click', () => {
-    const licenses = parseInt(document.getElementById('userLicenses').value);
-    const volume = parseInt(document.getElementById('volume').value);
-    const docVolume = parseInt(document.getElementById('documentVolume').value);
+    const licenses = Math.max(6, Math.min(55, parseInt(document.getElementById('userLicenses').value)));
+    const volume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('volume').value)));
+    const docVolume = Math.max(6000, Math.min(120000, parseInt(document.getElementById('documentVolume').value)));
     const selectedModules = [...document.querySelectorAll('#moduleCheckboxes input:checked')].map(cb => cb.value);
 
     const getSlabIndex = (val) => slabs.findIndex(slab => val >= slab.min && val <= slab.max);
@@ -116,15 +36,13 @@
 
     const firstYear = discountedModuleCost + totalLicenseCost;
     const secondYear = discountedModuleCost + (totalLicenseCost * 1.1);
+    const perLicense = firstYear / licenses;
 
     const format = x => "$" + Math.round(x).toLocaleString();
     document.getElementById('moduleCost').textContent = format(discountedModuleCost);
-    document.getElementById('perLicenseCost').textContent = format(licensePrice);
     document.getElementById('totalLicenseCost').textContent = format(totalLicenseCost);
     document.getElementById('firstYearTotal').textContent = format(firstYear);
+    document.getElementById('perLicenseCost').textContent = format(perLicense);
     document.getElementById('secondYearTotal').textContent = format(secondYear);
   });
 </script>
-
-</body>
-</html>
