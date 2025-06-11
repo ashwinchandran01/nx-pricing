@@ -1,3 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nippon Express Pricing Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdf6f0;
+      padding: 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+    label {
+      font-weight: bold;
+    }
+    .form-block {
+      margin-bottom: 20px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-top: 5px;
+    }
+    .results {
+      margin-top: 30px;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      background: #e65100;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+    }
+    .logo {
+      max-width: 200px;
+      display: block;
+      margin: 0 auto 30px auto;
+    }
+  </style>
+</head>
+<body>
+  <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/d5/Nippon_Express_logo.svg/320px-Nippon_Express_logo.svg.png" alt="Nippon Express Logo">
+
+  <h2>Nippon Express Pricing Calculator</h2>
+
+  <div class="form-block">
+    <label for="userLicenses">User Licenses</label>
+    <input type="number" id="userLicenses" value="15" min="6" max="55">
+  </div>
+
+  <div class="form-block">
+    <label for="volume">Volume (Containers)</label>
+    <input type="number" id="volume" value="10000" min="6000" max="120000">
+  </div>
+
+  <div class="form-block">
+    <label for="documentVolume">Document Volume</label>
+    <input type="number" id="documentVolume" value="10000" min="6000" max="120000">
+  </div>
+
+  <div class="form-block">
+    <label>Select Modules</label>
+    <div id="moduleCheckboxes">
+      <label><input type="checkbox" value="GoProcure"> GoProcure</label><br>
+      <label><input type="checkbox" value="GoTrack"> GoTrack</label><br>
+      <label><input type="checkbox" value="GoInvoice"> GoInvoice</label><br>
+      <label><input type="checkbox" value="GoShipment"> GoShipment</label><br>
+      <label><input type="checkbox" value="Order Management"> Order Management</label><br>
+      <label><input type="checkbox" value="Document Validation"> Document Validation</label><br>
+      <label><input type="checkbox" value="Document Reading"> Document Reading</label><br>
+    </div>
+  </div>
+
+  <button id="calculateBtn">Calculate</button>
+
+  <div class="results">
+    <h4>Pricing Summary:</h4>
+    <p>Module Cost: <span id="moduleCost"></span></p>
+    <p>Total License Cost (first 5 free): <span id="totalLicenseCost"></span></p>
+    <p>Per License Price: <span id="perLicensePrice"></span> × <span id="licenseQty"></span> billable licenses</p>
+    <p>Implementation Cost (One-time): <span id="implementationCost"></span></p>
+    <p>Integration Cost (One-time): <span id="integrationCost"></span></p>
+    <p>First Year Total: <span id="firstYearTotal"></span></p>
+    <p>First Year Cost per License: <span id="perLicenseCost"></span></p>
+    <p>Second Year Total (Recurring): <span id="secondYearTotal"></span></p>
+    <p style="font-size: 12px; color: #555;">*Support & maintenance (5%) included in module cost. Licenses above 5 are chargeable.</p>
+  </div>
+
 <script>
   const slabs = [
     { min: 6000, max: 24000 },
@@ -73,3 +168,5 @@
     document.getElementById('licenseQty').textContent = billableLicenses;
   });
 </script>
+</body>
+</html>
