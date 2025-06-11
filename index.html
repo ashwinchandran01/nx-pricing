@@ -129,6 +129,86 @@
     </p>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+  function calculateAndDisplay() {
+  const modules = {
+    "GoProcure": [7, 6.75, 6.45, 6.15, 5.8],
+    "GoTrack": [3.75, 3.15, 2.8, 1.95, 0.72],
+    "GoInvoice": [4.5, 4.3, 2.5, 2.25, 2],
+    "GoShipment": [3, 2.8, 2.65, 2.3, 1.8],
+    "Order Management": [5, 4.8, 4.65, 4.3, 3.8],
+    "Document Validation": [4.5, 4.3, 4.05, 3.7, 3.2],
+    "Document Reading": [2, 1.8, 1.75, 1.6, 1.4]
+  };
+
+  const slabs = [
+    { min: 6000, max: 24000, integration: 1500 },
+    { min: 24001, max: 42000, integration: 1500 },
+    { min: 42001, max: 60000, integration: 4000 },
+    { min: 60001, max: 84000, integration: 6000 },
+    { min: 84001, max: 120000, integration: 10000 }
+  ];
+
+  const licensePricing = [
+    { min: 6, max: 15, price: 100 },
+    { min: 16, max: 25, price: 90 },
+    { min: 26, max: 35, price: 80 },
+    { min: 36, max: 45, price: 70 },
+    { min: 46, max: 55, price: 60 }
+  ];
+
+  const volume = parseInt(document.getElementById("volume").value) || 6000;
+  const documents = parseInt(document.getElementById("documents").value) || 6000;
+  const licenses = parseInt(document.getElementById("licenses").value) || 6;
+  const selectedModules = Array.from(document.querySelectorAll(".module:checked")).map(i => i.value);
+
+  const getSlabIndex = (vol) => {
+    for (let i = 0; i < slabs.length; i++) {
+      if (vol >= slabs[i].min && vol <= slabs[i].max) return i;
+    }
+    return slabs.length - 1;
+  };
+
+  const slabIndex = getSlabIndex(volume);
+  const docSlabIndex = getSlabIndex(documents);
+  const integrationCost = slabs[slabIndex].integration;
+
+  let baseARR = 0;
+  selectedModules.forEach(module => {
+    const slabIdx = (module.includes("Document")) ? docSlabIndex : slabIndex;
+    const rate = modules[module][slabIdx];
+    const qty = module.includes("Document") ? documents : volume;
+    baseARR += rate * qty;
+  });
+
+  const supportCost = baseARR * 0.05;
+  const coreARR = baseARR + supportCost;
+  const implementationCost = baseARR * 0.15;
+
+  const billableLicenses = licenses > 5 ? licenses - 5 : 0;
+  let licenseRate = 100;
+  for (const tier of licensePricing) {
+    if (billableLicenses >= tier.min && billableLicenses <= tier.max) {
+      licenseRate = tier.price;
+      break;
+    }
+  }
+  const licenseCost = licenseRate * billableLicenses;
+
+  const firstYearTotal = coreARR + implementationCost + integrationCost + licenseCost;
+  const secondYearARR = coreARR * 1.1;
+  const secondYearTotal = secondYearARR + licenseCost;
+
+  const fmt = val => "$" + val.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  document.getElementById("moduleCost").innerText = fmt(coreARR);
+  document.getElementById("licenseQty").innerText = billableLicenses;
+  document.getElementById("totalLicenseCost").innerText = fmt(licenseCost);
+  document.getElementById("implementationCost").innerText = fmt(implementationCost);
+  document.getElementById("integrationCost").innerText = fmt(integrationCost);
+  document.getElementById("firstYearTotal").innerText = fmt(firstYearTotal);
+  document.getElementById("secondYearTotal").innerText = fmt(secondYearTotal);
+}
+ </script>
 </body>
 </html>
