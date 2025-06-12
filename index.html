@@ -112,6 +112,11 @@
     <div class="summary-row"><span class="label">Integration Cost (One time):</span> <span id="integrationCost" class="value"></span></div>
     <div class="summary-row"><span class="label">Implementation Cost (One time):</span> <span id="implementationCost" class="value"></span></div>
     <div class="summary-row"><span class="label">First Year Cost:</span> <span id="firstYearCost" class="value"></span></div>
+    <p style="margin-top:12px; font-size:0.85rem; color:#777; line-height:1.4;">
+      * Support & maintenance costs are included.<br>
+      * This cost is subject to the standard configurations available on the platform.<br>
+      * A 10% increase in project/license cost will apply from the second year (Negotiable).
+    </p>
   </div>
 
   <script>
@@ -172,7 +177,7 @@
     const billableLicenses = licenses > 5 ? licenses - 5 : 0;
     let licenseRate = 100;
     for (const tier of licensePricing) {
-      if (billableLicenses >= tier.min && billableLicenses <= tier.max) {
+      if (billappableLicenses >= tier.min && billappableLicenses <= tier.max) {
         licenseRate = tier.price;
         break;
       }
