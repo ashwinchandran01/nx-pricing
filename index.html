@@ -75,11 +75,11 @@
 
   <div class="results">
     <h4>Pricing Summary</h4>
-    <div class="summary-row"><span class="label">(A) Total Project Cost (Monthly):</span> <span id="totalProjectMonthly" class="value"></span></div>
-    <div class="summary-row"><span class="label">    Per License Cost (Monthly):</span> <span id="perLicenseMonthly" class="value"></span></div>
-    <div class="summary-row"><span class="label">(B) Integration Cost (One time):</span> <span id="integrationCost" class="value"></span></div>
-    <div class="summary-row"><span class="label">(C) Implementation Cost (One time):</span> <span id="implementationCost" class="value"></span></div>
-    <div class="summary-row"><span class="label">(Ax12+B+C) First Year Cost:</span> <span id="firstYearCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">Total Project Cost (Monthly):</span> <span id="totalProjectMonthly" class="value"></span></div>
+    <div class="summary-row"><span class="label">Per License Cost (Monthly):</span> <span id="perLicenseMonthly" class="value"></span></div>
+    <div class="summary-row"><span class="label">Integration Cost (One time):</span> <span id="integrationCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">Implementation Cost (One time):</span> <span id="implementationCost" class="value"></span></div>
+    <div class="summary-row"><span class="label">First Year Cost:</span> <span id="firstYearCost" class="value"></span></div>
     <p style="margin-top:12px; font-size:0.85rem; color:#777; line-height:1.4;">
       * Support & maintenance costs are included.<br>
       * This cost is subject to the standard configurations available on the platform.<br>
@@ -118,8 +118,7 @@
     const volume = parseInt(document.getElementById("volume").value) || 6000;
     const documents = parseInt(document.getElementById("documents").value) || 6000;
     const licenses = parseInt(document.getElementById("licenses").value) || 5;
-    const selectedModules = Array.from(document.querySelectorAll(".module:checked")
-      ).map(i => i.value);
+    const selectedModules = Array.from(document.querySelectorAll(".module:checked")).map(i => i.value);
 
     const getSlabIndex = vol => {
       for (let i = 0; i < slabs.length; i++) {
@@ -130,17 +129,25 @@
 
     const slabIndex = getSlabIndex(volume);
     const docSlabIndex = getSlabIndex(documents);
-    const integrationCost = slabs[slabIndex].integration;
 
+    // Calculate integration cost per selected module
+    let integrationCost = 0;
+    selectedModules.forEach(module => {
+      const idx = module.includes("Document") ? docSlabIndex : slabIndex;
+      integrationCost += slabs[idx].integration;
+    });
+
+    // Base ARR
     let baseARR = 0;
     selectedModules.forEach(module => {
-      const slabIdx = module.includes("Document") ? docSlabIndex : slabIndex;
-      baseARR += modules[module][slabIdx] * (module.includes("Document") ? documents : volume);
+      const idx = module.includes("Document") ? docSlabIndex : slabIndex;
+      baseARR += modules[module][idx] * (module.includes("Document") ? documents : volume);
     });
 
     const supportCost = baseARR * 0.05;
     const coreARR = baseARR + supportCost;
 
+    // License cost
     const billableLicenses = licenses > 5 ? licenses - 5 : 0;
     let licenseRate = 100;
     for (const tier of licensePricing) {
@@ -154,6 +161,7 @@
     const ultraCoreARR = coreARR + licenseCost;
     const implementationCost = baseARR * 0.15;
 
+    // Monthly & Yearly totals
     const totalProjectMonthly = ultraCoreARR / 12;
     const perLicenseMonthly = licenses > 0 ? ultraCoreARR / licenses / 12 : 0;
     const firstYearCost = totalProjectMonthly * 12 + integrationCost + implementationCost;
