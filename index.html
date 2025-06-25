@@ -14,52 +14,44 @@
     }
     label { font-weight: bold; }
     .form-block { margin-bottom: 20px; }
-    input[type="number"] {
-      width: 100%; padding: 10px; font-size: 1rem; margin-top: 5px; /* consider moving repeated style to a class */
-    }
+    input[type="number"] { width: 100%; padding: 10px; font-size: 1rem; margin-top: 5px; }
     .results {
-      margin-top: 30px; background: #ffffff; padding: 25px 30px;
+      margin-top: 30px; background: #fff; padding: 25px 30px;
       border: 1px solid #ccc; border-radius: 12px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
-    /* Consider externalizing CSS into a separate file for maintainability */
     .results h4 {
       margin-bottom: 20px; font-size: 1.4rem; color: #333;
       border-bottom: 1px solid #ddd; padding-bottom: 8px;
     }
-    .results .summary-row {
-      display: flex; justify-content: space-between;
-      margin-bottom: 12px; font-size: 1rem; color: #222;
-    }
-    .results .summary-row span.label { font-weight: 600; }
-    .results .summary-row span.value { font-weight: 500; color: #2c3e50; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1rem; color: #222; }
+    .summary-row .label { font-weight: 600; }
+    .summary-row .value { font-weight: 500; color: #2c3e50; }
     button {
-      padding: 10px 20px; background: #e65100; color: white;
+      padding: 10px 20px; background: #e65100; color: #fff;
       font-size: 1rem; border: none; cursor: pointer;
     }
-    .logo { max-width: 200px; display: block; margin: 0 auto 30px auto; }
+    .logo { max-width: 200px; display: block; margin: 0 auto 30px; }
     .form-section {
       background: #fff; padding: 20px; border-radius: 8px;
-      margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
   <img class="logo" src="https://companieslogo.com/img/orig/9147.T_BIG-23205936.png?t=1648301752&download=true" alt="Nippon Express Logo">
   <h2>Nippon Express Pricing Calculator</h2>
-
   <div class="form-section">
-    <!-- group related inputs into a form element to enable form submission and validation -->
     <div class="form-block">
       <label for="volume">Container Volume (Annual)</label>
       <input type="number" id="volume" min="6000" max="120000" value="10000">
     </div>
     <div class="form-block">
-      <label for="documents">Annual Document Volume (if Doc Validation & Reading enabled)</label>
+      <label for="documents">Annual Document Volume</label>
       <input type="number" id="documents" min="6000" max="120000" value="10000">
     </div>
     <div class="form-block">
-      <label for="licenses">Number of Licenses (Minimum 5)</label>
+      <label for="licenses">Number of Licenses</label>
       <input type="number" id="licenses" min="5" max="55" value="10">
     </div>
     <div class="form-block">
@@ -68,7 +60,6 @@
     </div>
     <div class="form-block">
       <label>Modules</label><br>
-      <!-- consider using a data-driven loop rather than hardcoding each checkbox -->
       <label><input type="checkbox" class="module" value="GoProcure"> GoProcure</label><br>
       <label><input type="checkbox" class="module" value="GoTrack"> GoTrack</label><br>
       <label><input type="checkbox" class="module" value="GoInvoice"> GoInvoice</label><br>
@@ -79,7 +70,6 @@
     </div>
     <button onclick="calculateAndDisplay()">Calculate</button>
   </div>
-
   <div class="results" aria-live="polite">
     <h4>Pricing Summary</h4>
     <div class="summary-row"><span class="label">(A) Total Project Cost (Monthly):</span> <span id="totalProjectMonthly" class="value"></span></div>
@@ -87,51 +77,89 @@
     <div class="summary-row"><span class="label">(B) Integration Cost (One time):</span> <span id="integrationCost" class="value"></span></div>
     <div class="summary-row"><span class="label">(C) Implementation Cost (One time):</span> <span id="implementationCost" class="value"></span></div>
     <div class="summary-row"><span class="label">(Ax12+B+C) First Year Cost:</span> <span id="firstYearCost" class="value"></span></div>
-    <p style="margin-top:12px; font-size:0.85rem; color:#777; line-height:1.4;">
-      * Support & maintenance costs are included.<br>
-      * This cost is subject to the standard configurations available on the platform.<br>
-      * A 10% increase in project/license cost will apply from the second year (Negotiable).
+    <p style="margin-top:12px;font-size:0.85rem;color:#777;line-height:1.4;">
+      * Support & maintenance included.<br>
+      * Standard configurations apply.<br>
+      * 10% increase from second year (Negotiable).
     </p>
   </div>
-
   <script>
-  function calculateAndDisplay() {
-    // use const/let consistently and avoid global sloppiness
-    const modules = {
-      "GoProcure": [7, 6.75, 6.45, 6.15, 5.8],
-      "GoTrack": [1.1, 1.1, 1, 0.85, 0.72],
-      "GoInvoice": [4.5, 4.3, 2.5, 2.25, 2],
-      "GoShipment": [3, 2.8, 2.65, 2.3, 1.8],
-      "Order Management": [5, 4.8, 4.65, 4.3, 3.8],
-      "Document Validation": [4.5, 4.3, 4.05, 3.7, 3.2],
-      "Document Reading": [2, 1.8, 1.75, 1.6, 1.4]
-    };
+    function calculateAndDisplay() {
+      const moduleRates = {
+        "GoProcure": [7,6.75,6.45,6.15,5.8],
+        "GoTrack": [1.1,1.1,1,0.85,0.72],
+        "GoInvoice": [4.5,4.3,2.5,2.25,2],
+        "GoShipment": [3,2.8,2.65,2.3,1.8],
+        "Order Management": [5,4.8,4.65,4.3,3.8],
+        "Document Validation": [4.5,4.3,4.05,3.7,3.2],
+        "Document Reading": [2,1.8,1.75,1.6,1.4]
+      };
+      const slabs = [
+        {min:6000,max:24000},
+        {min:24001,max:42000},
+        {min:42001,max:60000},
+        {min:60001,max:84000},
+        {min:84001,max:120000}
+      ];
+      const integrationRates = [1500,3000,4500,6000,7500,9000];
+      const getSlabIndex = (vol) => slabs.findIndex(s => vol>=s.min && vol<=s.max);
 
-    const slabs = [
-      { min: 6000, max: 24000 },
-      { min: 24001, max: 42000 },
-      { min: 42001, max: 60000 },
-      { min: 60001, max: 84000 },
-      { min: 84001, max: 120000 }
-    ];
+      const volume = +document.getElementById("volume").value || 0;
+      const documents = +document.getElementById("documents").value || 0;
+      const licenses = +document.getElementById("licenses").value || 0;
+      const systems = Math.min(Math.max(+document.getElementById("systems").value,1),6);
+      const selected = Array.from(document.querySelectorAll('.module:checked')).map(el=>el.value);
 
-    const integrationRates = [1500, 3000, 4500, 6000, 7500, 9000];
-    // consider validating inputs before parsing
-    const volume = Number(document.getElementById("volume").value) || 0;
-    const documents = Number(document.getElementById("documents").value) || 0;
-    const licenses = Number(document.getElementById("licenses").value) || 0;
-    const systems = Math.min(Math.max(Number(document.getElementById("systems").value), 1), integrationRates.length);
-    const selected = Array.from(document.querySelectorAll(".module:checked")).map(el => el.value);
+      // Integration cost
+      const integrationCost = integrationRates[systems-1] || 0;
 
-    // Calculate fixed integration cost by system count
-    const integrationCost = integrationRates[systems - 1] || 0;
+      // Base ARR
+      const slabIdx = getSlabIndex(volume);
+      const docSlabIdx = getSlabIndex(documents);
+      let baseARR = 0;
+      selected.forEach(mod => {
+        const idx = mod.includes('Document') ? docSlabIdx : slabIdx;
+        baseARR += (moduleRates[mod][idx] * (mod.includes('Document') ? documents : volume));
+      });
 
-    // Base ARR and other costs unchanged...
-    
-    // display results
-    document.getElementById("integrationCost").innerText = `$${integrationCost.toLocaleString()}`;
-    // consider batching DOM writes to improve performance
-  }
+      // Support & core ARR
+      const supportCost = baseARR * 0.05;
+      const coreARR = baseARR + supportCost;
+
+      // License cost
+      const billableLicenses = Math.max(licenses-5,0);
+      const licenseTiers = [
+        {min:6,max:15,price:100},
+        {min:16,max:25,price:90},
+        {min:26,max:35,price:80},
+        {min:36,max:45,price:70},
+        {min:46,max:55,price:60}
+      ];
+      let licenseRate=100;
+      licenseTiers.forEach(t=>{
+        if(billableLicenses>=t.min && billableLicenses<=t.max) licenseRate=t.price;
+      });
+      const licenseCost = licenseRate * billableLicenses;
+
+      // Ultra core ARR
+      const ultraCoreARR = coreARR + licenseCost;
+
+      // Implementation cost
+      const implementationCost = baseARR * 0.15;
+
+      // Monthly & yearly totals
+      const totalProjectMonthly = ultraCoreARR / 12;
+      const perLicenseMonthly = licenses>0 ? ultraCoreARR / licenses / 12 : 0;
+      const firstYearCost = totalProjectMonthly * 12 + integrationCost + implementationCost;
+
+      const fmt = v => '$' + Math.round(v).toLocaleString();
+
+      document.getElementById('totalProjectMonthly').innerText = fmt(totalProjectMonthly);
+      document.getElementById('perLicenseMonthly').innerText = fmt(perLicenseMonthly);
+      document.getElementById('integrationCost').innerText = fmt(integrationCost);
+      document.getElementById('implementationCost').innerText = fmt(implementationCost);
+      document.getElementById('firstYearCost').innerText = fmt(firstYearCost);
+    }
   </script>
 </body>
 </html>
