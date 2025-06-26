@@ -142,17 +142,31 @@
       // Calculate Base ARR before discounts
       let baseARR = 0;
       selected.forEach(mod => {
-        const idx = mod.includes('Document') ? slabs.findIndex(s => documents>=s.min&&documents<=s.max) : slabs.findIndex(s => volume>=s.min&&volume<=s.max);
+        const idx = mod.includes('Document')
+          ? slabs.findIndex(s => documents >= s.min && documents <= s.max)
+          : slabs.findIndex(s => volume >= s.min && volume <= s.max);
         const qty = mod.includes('Document') ? documents : volume;
         baseARR += moduleRates[mod][idx] * qty;
       });
 
-      // Part 1: module discounts (10% each, excluding GoTrack)
-      const discountableModules = ["GoProcure","GoInvoice","GoShipment","Order Management","Document Validation","Document Reading"];
-      const moduleDiscount = selected.reduce((sum, mod) => discountableModules.includes(mod) ? sum + 0.10 : sum, 0);
+      // Part 1: module discounts only if any container modules selected
+      const part1Modules = [
+        "GoProcure","GoInvoice","GoShipment",
+        "Order Management","Document Validation","Document Reading"
+      ];
+      const containerModules = selected.filter(mod => [
+        "GoProcure","GoTrack","GoInvoice","GoShipment","Order Management"
+      ].includes(mod));
+      let moduleDiscount = 0;
+      if (containerModules.length > 0) {
+        moduleDiscount = selected.reduce(
+          (sum, mod) => part1Modules.includes(mod) ? sum + 0.10 : sum,
+          0
+        );
+      }
 
-      // Part 2: slab discounts based on both volumes
-      const slabDiscount = getDiscountSlab(volume) + getDiscountSlab(documents);
+      // Part 2: slab discount based solely on container volume
+      const slabDiscount = getDiscountSlab(volume);
 
       const totalDiscount = moduleDiscount + slabDiscount;
 
