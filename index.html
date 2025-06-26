@@ -102,7 +102,35 @@
         {min:84001,max:120000}
       ];
       const integrationRates = [1500,3000,4500,6000,7500,9000];
-      const getSlabIndex = (vol) => slabs.findIndex(s => vol>=s.min && vol<=s.max);
+      const getSlabIndex = vol => slabs.findIndex(s => vol>=s.min && vol<=s.max);
+
+      // Discount slabs based on volume
+      const discountSlabs = [
+        {min:6000,max:10500,discount:-0.10},
+        {min:10501,max:15000,discount:-0.05},
+        {min:15001,max:19500,discount:0.05},
+        {min:19501,max:24000,discount:0.10},
+        {min:24001,max:28500,discount:-0.10},
+        {min:28501,max:33000,discount:-0.05},
+        {min:33001,max:37500,discount:0.05},
+        {min:37501,max:42000,discount:0.10},
+        {min:42001,max:46500,discount:-0.10},
+        {min:46501,max:51000,discount:-0.05},
+        {min:51001,max:55500,discount:0.05},
+        {min:55501,max:60000,discount:0.10},
+        {min:60001,max:66000,discount:-0.10},
+        {min:66001,max:72000,discount:-0.05},
+        {min:72001,max:78000,discount:0.05},
+        {min:78001,max:84000,discount:0.10},
+        {min:84001,max:93000,discount:-0.10},
+        {min:93001,max:102000,discount:-0.05},
+        {min:102001,max:111000,discount:0.05},
+        {min:111001,max:120000,discount:0.10}
+      ];
+      const getDiscountSlab = vol => {
+        const slab = discountSlabs.find(s => vol>=s.min && vol<=s.max);
+        return slab ? slab.discount : 0;
+      };
 
       const volume = +document.getElementById("volume").value || 0;
       const documents = +document.getElementById("documents").value || 0;
@@ -113,7 +141,7 @@
       // Integration cost
       const integrationCost = integrationRates[systems-1] || 0;
 
-      // Base ARR
+      // Base ARR before discount
       const slabIdx = getSlabIndex(volume);
       const docSlabIdx = getSlabIndex(documents);
       let baseARR = 0;
@@ -122,9 +150,21 @@
         baseARR += (moduleRates[mod][idx] * (mod.includes('Document') ? documents : volume));
       });
 
+      // Part 1: module discount (10% per chosen module)
+      const discountableModules = ["GoProcure","GoTrack","GoInvoice","GoShipment","Order Management","Document Validation","Document Reading"];
+      const moduleDiscount = selected.reduce((sum,mod) => discountableModules.includes(mod) ? sum + 0.10 : sum, 0);
+
+      // Part 2: slab discount based on container volume
+      const slabDiscount = getDiscountSlab(volume);
+
+      const totalDiscount = moduleDiscount + slabDiscount;
+
+      // Apply discount to base ARR
+      const discountedBaseARR = baseARR * (1 - totalDiscount);
+
       // Support & core ARR
-      const supportCost = baseARR * 0.05;
-      const coreARR = baseARR + supportCost;
+      const supportCost = discountedBaseARR * 0.05;
+      const coreARR = discountedBaseARR + supportCost;
 
       // License cost
       const billableLicenses = Math.max(licenses-5,0);
@@ -144,7 +184,7 @@
       // Ultra core ARR
       const ultraCoreARR = coreARR + licenseCost;
 
-      // Implementation cost
+      // Implementation cost based on original baseARR
       const implementationCost = baseARR * 0.15;
 
       // Monthly & yearly totals
