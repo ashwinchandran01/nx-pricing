@@ -81,7 +81,6 @@
       * Support & maintenance included.<br>
       * Standard configurations apply.<br>
       * 10% increase from second year (Negotiable).
-      * Exclusion: Document transfer – Any changes to the client system or middleware system will be the customer's responsibility.
     </p>
   </div>
   <script>
@@ -102,7 +101,6 @@
         {min:60001,max:84000},
         {min:84001,max:120000}
       ];
-      // Discount slabs based on volume
       const discountSlabs = [
         {min:6000,max:10500,discount:-0.10},
         {min:10501,max:15000,discount:-0.05},
@@ -125,41 +123,39 @@
         {min:102001,max:111000,discount:0.05},
         {min:111001,max:120000,discount:0.10}
       ];
-      const getSlabIndex = vol => slabs.findIndex(s => vol>=s.min && vol<=s.max);
       const getDiscountSlab = vol => {
-        const slab = discountSlabs.find(s => vol>=s.min && vol<=s.max);
+        const slab = discountSlabs.find(s => vol >= s.min && vol <= s.max);
         return slab ? slab.discount : 0;
       };
 
       const volume = +document.getElementById("volume").value || 0;
       const documents = +document.getElementById("documents").value || 0;
       const licenses = +document.getElementById("licenses").value || 0;
-      const systems = Math.min(Math.max(+document.getElementById("systems").value,1),6);
-      const selected = Array.from(document.querySelectorAll('.module:checked')).map(el=>el.value);
+      const systems = Math.min(Math.max(+document.getElementById("systems").value, 1), 6);
+      const selected = Array.from(document.querySelectorAll('.module:checked')).map(el => el.value);
 
-      // Integration cost based on number of systems
-      const integrationRates = [1500,3000,4500,6000,7500,9000];
-      const integrationCost = integrationRates[systems-1] || 0;
+      // Integration cost by systems
+      const integrationRates = [1500, 3000, 4500, 6000, 7500, 9000];
+      const integrationCost = integrationRates[systems - 1] || 0;
 
-      // Base ARR before discount
-      const slabIdx = getSlabIndex(volume);
-      const docSlabIdx = getSlabIndex(documents);
+      // Calculate Base ARR before discounts
       let baseARR = 0;
       selected.forEach(mod => {
-        const idx = mod.includes('Document') ? docSlabIdx : slabIdx;
-        baseARR += (moduleRates[mod][idx] * (mod.includes('Document') ? documents : volume));
+        const idx = mod.includes('Document') ? slabs.findIndex(s => documents>=s.min&&documents<=s.max) : slabs.findIndex(s => volume>=s.min&&volume<=s.max);
+        const qty = mod.includes('Document') ? documents : volume;
+        baseARR += moduleRates[mod][idx] * qty;
       });
 
-      // Part 1: module discount (10% per chosen module)
-      const discountableModules = ["GoProcure","GoTrack","GoInvoice","GoShipment","Order Management","Document Validation","Document Reading"];
-      const moduleDiscount = selected.reduce((sum,mod) => discountableModules.includes(mod) ? sum + 0.10 : sum, 0);
+      // Part 1: module discounts (10% each, excluding GoTrack)
+      const discountableModules = ["GoProcure","GoInvoice","GoShipment","Order Management","Document Validation","Document Reading"];
+      const moduleDiscount = selected.reduce((sum, mod) => discountableModules.includes(mod) ? sum + 0.10 : sum, 0);
 
-      // Part 2: slab discount based on container volume
-      const slabDiscount = getDiscountSlab(volume);
+      // Part 2: slab discounts based on both volumes
+      const slabDiscount = getDiscountSlab(volume) + getDiscountSlab(documents);
 
       const totalDiscount = moduleDiscount + slabDiscount;
 
-      // Apply discount to base ARR
+      // Apply combined discount to Base ARR
       const discountedBaseARR = baseARR * (1 - totalDiscount);
 
       // Support & core ARR
@@ -167,7 +163,7 @@
       const coreARR = discountedBaseARR + supportCost;
 
       // License cost
-      const billableLicenses = Math.max(licenses-5,0);
+      const billableLicenses = Math.max(licenses - 5, 0);
       const licenseTiers = [
         {min:6,max:15,price:100},
         {min:16,max:25,price:90},
@@ -175,21 +171,21 @@
         {min:36,max:45,price:70},
         {min:46,max:55,price:60}
       ];
-      let licenseRate=100;
-      licenseTiers.forEach(t=>{
-        if(billableLicenses>=t.min && billableLicenses<=t.max) licenseRate=t.price;
+      let licenseRate = 100;
+      licenseTiers.forEach(t => {
+        if (billableLicenses >= t.min && billableLicenses <= t.max) licenseRate = t.price;
       });
       const licenseCost = licenseRate * billableLicenses;
 
       // Ultra core ARR
       const ultraCoreARR = coreARR + licenseCost;
 
-      // Implementation cost (fixed)
+      // Fixed implementation cost
       const implementationCost = 2500;
 
-      // Monthly & yearly totals
+      // Final calculations
       const totalProjectMonthly = ultraCoreARR / 12;
-      const perLicenseMonthly = licenses>0 ? ultraCoreARR / licenses / 12 : 0;
+      const perLicenseMonthly = licenses > 0 ? ultraCoreARR / licenses / 12 : 0;
       const firstYearCost = totalProjectMonthly * 12 + integrationCost + implementationCost;
 
       const fmt = v => '$' + Math.round(v).toLocaleString();
