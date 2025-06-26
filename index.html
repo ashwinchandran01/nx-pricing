@@ -101,9 +101,6 @@
         {min:60001,max:84000},
         {min:84001,max:120000}
       ];
-      const integrationRates = [1500,3000,4500,6000,7500,9000];
-      const getSlabIndex = vol => slabs.findIndex(s => vol>=s.min && vol<=s.max);
-
       // Discount slabs based on volume
       const discountSlabs = [
         {min:6000,max:10500,discount:-0.10},
@@ -127,6 +124,7 @@
         {min:102001,max:111000,discount:0.05},
         {min:111001,max:120000,discount:0.10}
       ];
+      const getSlabIndex = vol => slabs.findIndex(s => vol>=s.min && vol<=s.max);
       const getDiscountSlab = vol => {
         const slab = discountSlabs.find(s => vol>=s.min && vol<=s.max);
         return slab ? slab.discount : 0;
@@ -138,8 +136,8 @@
       const systems = Math.min(Math.max(+document.getElementById("systems").value,1),6);
       const selected = Array.from(document.querySelectorAll('.module:checked')).map(el=>el.value);
 
-      // Integration cost
-      const integrationCost = integrationRates[systems-1] || 0;
+      // Integration cost (fixed)
+      const integrationCost = 2500;
 
       // Base ARR before discount
       const slabIdx = getSlabIndex(volume);
