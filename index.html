@@ -136,8 +136,9 @@
       const systems = Math.min(Math.max(+document.getElementById("systems").value,1),6);
       const selected = Array.from(document.querySelectorAll('.module:checked')).map(el=>el.value);
 
-      // Integration cost (fixed)
-      const integrationCost = 2500;
+      // Integration cost based on number of systems
+      const integrationRates = [1500,3000,4500,6000,7500,9000];
+      const integrationCost = integrationRates[systems-1] || 0;
 
       // Base ARR before discount
       const slabIdx = getSlabIndex(volume);
@@ -182,8 +183,8 @@
       // Ultra core ARR
       const ultraCoreARR = coreARR + licenseCost;
 
-      // Implementation cost based on original baseARR
-      const implementationCost = baseARR * 0.15;
+      // Implementation cost (fixed)
+      const implementationCost = 2500;
 
       // Monthly & yearly totals
       const totalProjectMonthly = ultraCoreARR / 12;
